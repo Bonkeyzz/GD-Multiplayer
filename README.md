@@ -5,5 +5,5 @@ This mod is in beta release, so it will have some bugs.
 
 #Bugs
 
--Thread tcp handler is not working properly.\n
+-Thread tcp handler is not working properly. 
 -Remote program returns exception if server closes

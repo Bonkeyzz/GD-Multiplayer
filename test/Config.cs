@@ -13,7 +13,7 @@ namespace test
     class Config
     {
         public bool bGDWindowFound = false;
-        public IntPtr iGDWindow;
+        public static IntPtr iGDWindow;
         public static string sIPAddress;
         public int iPort = 8612;
         public bool Success = false;

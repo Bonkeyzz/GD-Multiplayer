@@ -1,6 +1,5 @@
-C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Debug\test.exe.config
-C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Debug\test.exe
-C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Debug\test.pdb
-C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Debug\GDMultiplayer.csprojResolveAssemblyReference.cache
-C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Debug\test.exe
-C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Debug\test.pdb
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Debug\GDMultiplayer.exe.config
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Debug\GDMultiplayer.exe
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Debug\GDMultiplayer.pdb
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Debug\GDMultiplayer.exe
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Debug\GDMultiplayer.pdb

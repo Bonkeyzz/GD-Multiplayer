@@ -1,0 +1,5 @@
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Release\GDMultiplayer.exe.config
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Release\GDMultiplayer.exe
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\bin\Release\GDMultiplayer.pdb
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Release\GDMultiplayer.exe
+C:\Users\Bonkeyz\documents\visual studio 2015\Projects\test\test\obj\Release\GDMultiplayer.pdb

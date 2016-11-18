@@ -18,9 +18,8 @@ namespace test
         public int iPort = 8612;
         public bool Success = false;
 
-        public Socket TCPClient = null;
-        public Socket TCPServer = null;
-
+        public static Socket tcp_client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        public static Socket tcp_server = null;
         public enum Types
         {
             TCP_HOST = 1,
@@ -28,13 +27,6 @@ namespace test
         }
 
         public IPEndPoint IPEnd;
-        public bool bConnected()
-        {
-            if (TCPClient != null)
-            {
-                return TCPClient.Connected;
-            }
-            return false;
-        }
+
     }
 }

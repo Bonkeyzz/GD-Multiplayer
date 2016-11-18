@@ -163,7 +163,7 @@ namespace test
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     [DllImport("user32.dll")]
-    public static extern bool GetAsyncKeyState(System.Windows.Forms.Keys vKey);
+    public static extern short GetAsyncKeyState(System.Windows.Forms.Keys vKey);
 
     }
 }

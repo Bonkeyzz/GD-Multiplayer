@@ -15,11 +15,10 @@ namespace test
     class Program
     {
         public static int iType;
-
         static void InitializeVariables()
         {
             Config cfg = new Config();
-            new MainFunctions().ConsoleWrite("[GDMP Log] -> Waiting for Geometry Dash...", ConsoleColor.Gray);
+            new MainFunctions().ConsoleWrite("[GDMP Log] -> Waiting for Geometry Dash...", ConsoleColor.White);
             while (Config.iGDWindow == IntPtr.Zero)
             {
                 Config.iGDWindow = GDNative.FindWindow(default(string), "Geometry Dash");
@@ -50,16 +49,21 @@ namespace test
             }
             return null;
         }
+
+        private bool P1Jump = false;
+        private bool P2Jump = false;
         void thread_InitializeTCP()
         {
             Config cfg = new Config();
             MainFunctions mf = new MainFunctions();
-
+            Thread keylistener = new Thread(thread_KeyPressDetection);
+            Thread tcpthread = new Thread(thread_tcpreceivesend);
             cfg.IPEnd = new IPEndPoint(IPAddress.Parse(Config.sIPAddress), cfg.iPort);
 
             switch (iType)
             {
                 case (int) Config.Types.TCP_HOST:
+                {
                     new MainFunctions().ConsoleWrite($"[GDMP Log] -> Detected Type: 1", ConsoleColor.White);
                     using (Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                     {
@@ -71,71 +75,63 @@ namespace test
                         server.Listen(1); // Number of players that are can join.
                         new MainFunctions().ConsoleWrite($"[GDMP] Server is running and is waiting for Player 2...",
                             ConsoleColor.Green);
-                        using (Socket accepted = server.Accept())
-                        {
-                            SendSocketMessage(accepted, "connection_success");
+                            // using (Socket accepted = server.Accept())
+                        Config.tcp_server = server.Accept();
+                            SendSocketMessage(Config.tcp_server, "connection_success");
 
                             while (true)
                             {
-                                string connectionbuffer = ReceiveSocketMessage(accepted, 18);
+                                string connectionbuffer = ReceiveSocketMessage(Config.tcp_server, 18);
                                 if (connectionbuffer == "connection_success")
                                 {
                                     mf.ConsoleWrite("Player 2 Connected Successfully!", ConsoleColor.Green);
-                                    new MainFunctions().ConsoleWrite("[GDMP Notice] Player2's Color will be the opposite of Player1's color!", ConsoleColor.Yellow);
-                                    connectionbuffer = null;
+                                    new MainFunctions().ConsoleWrite(
+                                        "[GDMP Notice] Player2's Color will be the opposite of Player1's color!",
+                                        ConsoleColor.Yellow);
+                                    break;
                                 }
-                                connectionbuffer = ReceiveSocketMessage(accepted, 6);
-                                if (GDNative.GetAsyncKeyState(Keys.Space) || GDNative.GetAsyncKeyState(Keys.LButton))
-                                {
-                                    SendSocketMessage(accepted, "P1Jump");
-                                }
-                                if (connectionbuffer == "P2Jump")
-                                {
-                                    mf.PlayerJump(2);
-                                }
-                            }
 
-                        }
+                            }
+                            keylistener.Start();
+                            new MainFunctions().ConsoleWrite("[GDMP Log] -> Key listener thread started!",
+                                ConsoleColor.Yellow);
+                            tcpthread.Start();
+                            new MainFunctions().ConsoleWrite("[GDMP Log] -> TCP Handler thread started!",
+                                ConsoleColor.Yellow);
+
                     }
-                    break;
+                        break;
+               }
                 case (int) Config.Types.TCP_CLIENT:
+                   {
                     new MainFunctions().ConsoleWrite($"[GDMP Log] -> Detected Type: 2", ConsoleColor.White);
-                    using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-                    {
-                        new MainFunctions().ConsoleWrite($"[GDMP] Connecting to IP: {cfg.IPEnd.Address} with Port: {cfg.IPEnd.Port}...",
+                        new MainFunctions().ConsoleWrite(
+                            $"[GDMP] Connecting to IP: {cfg.IPEnd.Address} with Port: {cfg.IPEnd.Port}...",
                             ConsoleColor.White);
                         try
                         {
-                            client.Connect(cfg.IPEnd);
+                            Config.tcp_client.Connect(cfg.IPEnd);
                         }
                         catch (Exception)
                         {
-                            new MainFunctions().ConsoleWrite("[GDMP Log] -> Connection Refused => 8-1", ConsoleColor.Red);
+                            new MainFunctions().ConsoleWrite("[GDMP Log] -> Connection Refused", ConsoleColor.Red);
                         }
 
 
-                        SendSocketMessage(client, "connection_success");
-                        while (client.Connected)
+
+                        SendSocketMessage(Config.tcp_client, "connection_success");
+                        while (Config.tcp_client.Connected)
                         {
                             try
                             {
-                                string connectionbuffer = ReceiveSocketMessage(client, 18);
+                                string connectionbuffer = ReceiveSocketMessage(Config.tcp_client, 18);
                                 if (connectionbuffer == "connection_success")
                                 {
                                     mf.ConsoleWrite("Connected to Server!", ConsoleColor.Green);
                                     new MainFunctions().ConsoleWrite(
                                         "[GDMP Notice] Your Color will be the opposite of Player1's color!",
                                         ConsoleColor.Yellow);
-                                    connectionbuffer = null;
-                                }
-                                connectionbuffer = ReceiveSocketMessage(client, 6);
-                                if (GDNative.GetAsyncKeyState(Keys.Space) || GDNative.GetAsyncKeyState(Keys.LButton))
-                                {
-                                    SendSocketMessage(client, "P2Jump");
-                                }
-                                if (connectionbuffer == "P1Jump")
-                                {
-                                    mf.PlayerJump(1);
+                                        break;
                                 }
                             }
                             catch
@@ -143,10 +139,84 @@ namespace test
                             {
 
                             }
+
                         }
-                    }
+                        keylistener.Start();
+                        new MainFunctions().ConsoleWrite("[GDMP Log] -> Key listener thread started!",
+                            ConsoleColor.Yellow);
+                        tcpthread.Start();
+                        new MainFunctions().ConsoleWrite("[GDMP Log] -> TCP Handler thread started!",
+                            ConsoleColor.Yellow);
+
                     break;
+                }
             }
+        }
+        void thread_KeyPressDetection()
+        {
+            while (true)
+            {
+                short P1state = GDNative.GetAsyncKeyState(Keys.LButton);
+                short P2state = GDNative.GetAsyncKeyState(Keys.Up);
+                if (iType == (int) Config.Types.TCP_HOST)
+                {
+                    if (P1state == -32767)
+                    {
+                        P2Jump = true;
+                    }
+                }
+                else if (iType == (int) Config.Types.TCP_CLIENT)
+                {
+                    if (P2state == -32767)
+                    {
+                        P1Jump = true;
+                    }
+                }
+            }
+        }
+
+        void thread_tcpreceivesend()
+        {
+            Config cfg = new Config();
+            MainFunctions mf = new MainFunctions();
+            string buffer = null;
+            while (true)
+            {
+                switch (iType)
+                {
+                    case 1: //TYPE.TCP_HOST
+                        if (P1Jump)
+                        {
+                            SendSocketMessage(Config.tcp_server, "P1Jump");
+                            P1Jump = false;
+                            new MainFunctions().ConsoleWrite("[GDMP Log] -> Player1 Jumped!", ConsoleColor.Cyan);
+                        }
+                        buffer = ReceiveSocketMessage(Config.tcp_server, 6);
+                        if (buffer == "P2Jump")
+                        {
+                            mf.PlayerJump(2);
+                            buffer = null;
+                            new MainFunctions().ConsoleWrite("[GDMP Remote Log] -> Player2 Jumped!", ConsoleColor.DarkCyan);
+                        }
+                        break;
+                    case 2: //TYPE.TCP_CLIENT
+                        if (P2Jump)
+                        {
+                            SendSocketMessage(Config.tcp_server, "P2Jump");
+                            P2Jump = false;
+                            new MainFunctions().ConsoleWrite("[GDMP Log] -> Player2 Jumped!", ConsoleColor.Cyan);
+                        }
+                        buffer = ReceiveSocketMessage(Config.tcp_client, 6);
+                        if (buffer == "P1Jump")
+                        {
+                            mf.PlayerJump(1);
+                            buffer = null;
+                            new MainFunctions().ConsoleWrite("[GDMP Remote Log] -> Player1 Jumped!", ConsoleColor.DarkCyan);
+                        }
+                        break;
+                }
+            }
+            
         }
         static void Main(string[] args)
         {

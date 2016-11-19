@@ -72,7 +72,7 @@ namespace test
                             ConsoleColor.White);
                         server.Bind(cfg.IPEnd);
                         new MainFunctions().ConsoleWrite($"[GDMP Log] -> Listening for 1 client...", ConsoleColor.White);
-                        server.Listen(1); // Number of players that are can join.
+                        server.Listen(1); // Number of players that can join.
                         new MainFunctions().ConsoleWrite($"[GDMP] Server is running and is waiting for Player 2...",
                             ConsoleColor.Green);
                             // using (Socket accepted = server.Accept())
